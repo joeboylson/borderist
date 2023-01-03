@@ -1,37 +1,96 @@
 <!DOCTYPE html>
+<html>
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>NGINX on Railway</title>
-    <meta name="description" content="Choo Choo!" />
+<head>
+    <meta charset="utf-8">
+    <title>Image Preview</title>
+</head>
 
-    <link rel="icon" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+<body>
 
-    <link rel="stylesheet" href="/styles.css?v=1.0" />
-  </head>
-
-  <body>
     <main>
-      <img
-        src="https://railway.app/brand/logo-light.svg"
-        alt="Railway logo"
-        class="logo"
-      />
 
-      <h1>NGINX on Railway</h1>
+        <div id="image-upload-form">
+            <form>
+                <input type="file" id="image-input" accept="image/*">
+            </form>
+        </div>
 
-      <p>
-        Choo Choo! This is an example of an NGINX static site running on
-        Railway.
-        <a
-          href="https://github.com/railwayapp/starters/tree/master/examples/nginx"
-          >View source</a
-        >.
-      </p>
+        <div id="image-preview">
+            <canvas id="canvas-image-preview"></canvas>
+            <a id="download-link" href="" download>Download</a>
+        </div>
     </main>
 
-    <script src="/script.js"></script>
-  </body>
+    <script>
+        const imageUploadForm = document.querySelector("#image-upload-form");
+        const imagePreview = document.querySelector("#image-preview");
+        const fileInput = document.querySelector('#image-input');
+
+        const hideElement = (ele) => ele.style.display = "none";
+        const showElement = (ele) => ele.style.display = "block";
+        const handlePageLoad = () => hideElement(imagePreview);
+
+        const setDownloadLink = (href, name) => {
+            const downloadLink = document.querySelector("#download-link");
+            downloadLink.setAttribute('href', href);
+
+            const _downloadName = `borderly-${name}`
+            downloadLink.setAttribute('download', _downloadName);
+        }
+
+        const handleImageLoad = (image, filename) => {
+
+            hideElement(imageUploadForm);
+            showElement(imagePreview);
+
+            const canvas = document.querySelector('#canvas-image-preview');
+            const ctx = canvas.getContext('2d');
+
+            const borderWidth = image.width * 0.05;
+
+            canvas.width = image.width + (borderWidth * 2);
+            canvas.height = image.height + (borderWidth * 2);
+
+            // Add background rectangle which will become border
+            ctx.fillStyle = "green";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.drawImage(image, borderWidth, borderWidth);
+
+            const updatedCanvas = document.querySelector('#canvas-image-preview');
+            const dataURL = canvas.toDataURL();
+            setDownloadLink(dataURL, filename);
+        }
+
+        const handleFileInputChange = (event) => {
+            const file = event.target.files[0];
+            const filename = file.name
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const dataUrl = event.target.result;
+                const image = new Image();
+                image.src = dataUrl;
+                image.onload = () => handleImageLoad(image, filename)
+            };
+        }
+
+        window.addEventListener("DOMContentLoaded", handlePageLoad)
+        fileInput.addEventListener('change', handleFileInputChange);
+    </script>
+</body>
+
+<style>
+    main {
+        width: 500px;
+    }
+
+    canvas {
+        border: 1px solid black;
+        width: 100%;
+    }
+</style>
+
 </html>
