@@ -1,0 +1,9 @@
+main {
+  place-self: center;
+  width: 500px;
+}
+
+canvas {
+  border: 1px solid black;
+  width: 100%;
+}
